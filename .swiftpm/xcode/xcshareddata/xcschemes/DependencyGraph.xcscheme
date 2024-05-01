@@ -1057,11 +1057,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "/Users/simonbs/Developer/RunestoneEditor"
+            argument = "/Users/hchan/Developer/RunestoneEditor"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/hchan/code/dinerios-main/src/DinerApp.xcodeproj"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "--syntax d2"
+            argument = "--syntax dot"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

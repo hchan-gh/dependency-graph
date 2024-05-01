@@ -12,12 +12,12 @@ public struct XcodeProjectParserLive: XcodeProjectParser {
         self.fileSystem = fileSystem
     }
 
-    public func parseProject(at fileURL: URL) throws -> XcodeProject {
+    public func parseProject(at fileURL: URL, packagesURL: (URL) -> URL?) throws -> XcodeProject {
         let path = Path(fileURL.relativePath)
         let project = try XcodeProj(path: path)
         let sourceRoot = fileURL.deletingLastPathComponent()
         let remoteSwiftPackages = remoteSwiftPackages(in: project)
-        let localSwiftPackages = try localSwiftPackages(in: project, atSourceRoot: sourceRoot)
+        let localSwiftPackages = try localSwiftPackages(in: project, atSourceRoot: packagesURL(sourceRoot) ?? sourceRoot)
         return XcodeProject(
             name: fileURL.lastPathComponent,
             targets: targets(in: project),
@@ -30,7 +30,10 @@ private extension XcodeProjectParserLive {
     func targets(in project: XcodeProj) -> [XcodeProject.Target] {
         return project.pbxproj.nativeTargets.map { target in
             let packageProductDependencies = target.packageProductDependencies.map(\.productName)
-            return .init(name: target.name, packageProductDependencies: packageProductDependencies)
+            let dependencies = target.dependencies.compactMap({ $0.target?.uuid })
+            // Name not product name
+            let nativeTargets = project.pbxproj.nativeTargets.filter({ dependencies.contains($0.uuid) }).map({ $0.name })
+            return .init(name: target.name, dependencies: nativeTargets, packageProductDependencies: packageProductDependencies)
         }
     }
 

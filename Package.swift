@@ -47,10 +47,12 @@ let package = Package(
         // Sources/Library/Commands
         .target(name: "GraphCommand", dependencies: [
             "DirectedGraphMapper",
+            "DirectedGraphXcodeHelpers",
             "DirectedGraphWriter",
             "PackageGraphBuilder",
             "PackageSwiftFileParser",
             "ProjectRootClassifier",
+            "UndirectedGraph",
             "XcodeProjectParser",
             "XcodeProjectGraphBuilder"
         ], path: "Sources/Library/Commands/GraphCommand"),
@@ -88,6 +90,9 @@ let package = Package(
             "PackageGraphBuilder",
             "PackageSwiftFile"
         ], path: "Sources/Library/Graphing/PackageGraphBuilderLive"),
+        .target(name: "UndirectedGraph", dependencies: [
+            "DirectedGraph"
+        ], path: "Sources/Library/Graphing/UndirectedGraph"),
         .target(name: "XcodeProjectGraphBuilder", dependencies: [
             "DirectedGraph",
             "PackageGraphBuilder",

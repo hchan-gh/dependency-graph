@@ -31,6 +31,11 @@ public struct AllDependenciesGraphBuilder {
                     throw XcodeProjectGraphBuilderLiveError.dependencyNotFound(dependency: dependency, dependant: target.name)
                 }
             }
+            // Build graph for native targets
+            for depdencyTarget in target.dependencies {
+                let dependencyTargetNode = projectCluster.addUniqueNode(.target(labeled: depdencyTarget))
+                graph.addUniqueEdge(.from(targetNode, to: dependencyTargetNode))
+            }
         }
         return graph
     }

@@ -138,6 +138,7 @@ let package = Package(
         ], path: "Sources/Library/Parsing/ProjectRootClassifierLive"),
         .target(name: "XcodeProject", path: "Sources/Library/Parsing/XcodeProject"),
         .target(name: "XcodeProjectParser", dependencies: [
+            "XcodeProj",
             "XcodeProject"
         ], path: "Sources/Library/Parsing/XcodeProjectParser"),
         .target(name: "XcodeProjectParserLive", dependencies: [

@@ -12,7 +12,7 @@ public struct XcodeProjectParserLive: XcodeProjectParser {
         self.fileSystem = fileSystem
     }
 
-    public func parseProject(at fileURL: URL, packagesURL: (URL) -> URL?) throws -> XcodeProject {
+    public func parseProject(at fileURL: URL, packagesURL: (URL) -> URL?, includeNativeTarget: ((PBXNativeTarget) -> Bool)?, includePackageProduct: ((XCSwiftPackageProductDependency) -> Bool)?) throws -> XcodeProject {
         let path = Path(fileURL.relativePath)
         let project = try XcodeProj(path: path)
         let sourceRoot = fileURL.deletingLastPathComponent()
@@ -20,21 +20,23 @@ public struct XcodeProjectParserLive: XcodeProjectParser {
         let localSwiftPackages = try localSwiftPackages(in: project, atSourceRoot: packagesURL(sourceRoot) ?? sourceRoot)
         return XcodeProject(
             name: fileURL.lastPathComponent,
-            targets: targets(in: project),
+            targets: targets(in: project, includeNativeTarget: includeNativeTarget, includePackageProduct: includePackageProduct),
             swiftPackages: (remoteSwiftPackages + localSwiftPackages)
         )
     }
 }
 
 private extension XcodeProjectParserLive {
-    func targets(in project: XcodeProj) -> [XcodeProject.Target] {
-        return project.pbxproj.nativeTargets.map { target in
-            let packageProductDependencies = target.packageProductDependencies.map(\.productName)
-            let dependencies = target.dependencies.compactMap({ $0.target?.uuid })
-            // Name not product name
-            let nativeTargets = project.pbxproj.nativeTargets.filter({ dependencies.contains($0.uuid) }).map({ $0.name })
-            return .init(name: target.name, dependencies: nativeTargets, packageProductDependencies: packageProductDependencies)
-        }
+    func targets(in project: XcodeProj, includeNativeTarget: ((PBXNativeTarget) -> Bool)?, includePackageProduct: ((XCSwiftPackageProductDependency) -> Bool)?) -> [XcodeProject.Target] {
+        return project.pbxproj.nativeTargets
+            .filter({ includeNativeTarget?($0) ?? true })
+            .map { target in
+                let packageProductDependencies = target.packageProductDependencies.filter({ includePackageProduct?($0) ?? true }).map(\.productName)
+                let dependencies = target.dependencies.compactMap({ $0.target?.uuid })
+                // Name not product name
+                let nativeDependencies = project.pbxproj.nativeTargets.filter({ dependencies.contains($0.uuid) }).map({ $0.name })
+                return .init(name: target.name, dependencies: nativeDependencies, packageProductDependencies: packageProductDependencies)
+            }
     }
 
     func remoteSwiftPackages(in project: XcodeProj) -> [XcodeProject.SwiftPackage] {

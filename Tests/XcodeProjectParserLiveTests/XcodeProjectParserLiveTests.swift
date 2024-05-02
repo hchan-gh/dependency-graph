@@ -5,13 +5,13 @@ import XCTest
 final class XcodeProjectParserLiveTests: XCTestCase {
     func testParsesProjectName() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         XCTAssertEqual(xcodeProject.name, "Example.xcodeproj")
     }
 
     func testParsesTargets() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         let exampleTarget = xcodeProject.targets.first { $0.name == "Example" }
         let exampleTestsTarget = xcodeProject.targets.first { $0.name == "ExampleTests" }
         let exampleUITestsTarget = xcodeProject.targets.first { $0.name == "ExampleUITests" }
@@ -22,7 +22,7 @@ final class XcodeProjectParserLiveTests: XCTestCase {
 
     func testParsesTargetPackageProductDependencies() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         let exampleTarget = xcodeProject.targets.first { $0.name == "Example" }
         let packageProductDependencies = exampleTarget?.packageProductDependencies ?? []
         XCTAssertTrue(packageProductDependencies.contains("Runestone"))
@@ -34,13 +34,13 @@ final class XcodeProjectParserLiveTests: XCTestCase {
 
     func testSwiftPackageCount() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         XCTAssertEqual(xcodeProject.swiftPackages.count, 4)
     }
 
     func testParsesLocalSwiftPackage() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         let swiftPackage = xcodeProject.swiftPackages.first { $0.name == "ExamplePackageA" }
         XCTAssertNotNil(swiftPackage)
         if case let .local(parameters) = swiftPackage {
@@ -54,7 +54,7 @@ final class XcodeProjectParserLiveTests: XCTestCase {
 
     func testParsesRemoteSwiftPackageWithSingleProduct() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         let swiftPackage = xcodeProject.swiftPackages.first { $0.name == "Runestone" }
         XCTAssertNotNil(swiftPackage)
         if case let .remote(parameters) = swiftPackage {
@@ -68,7 +68,7 @@ final class XcodeProjectParserLiveTests: XCTestCase {
 
     func testParsesRemoteSwiftPackageWithMultipleProducts() throws {
         let parser = XcodeProjectParserLive(fileSystem: FileSystemMock())
-        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil })
+        let xcodeProject = try parser.parseProject(at: URL.Mock.exampleXcodeProject, packagesURL: { _ in nil }, includeNativeTarget: nil, includePackageProduct: nil)
         let swiftPackage = xcodeProject.swiftPackages.first { $0.name == "TreeSitterLanguages" }
         XCTAssertNotNil(swiftPackage)
         if case let .remote(parameters) = swiftPackage {

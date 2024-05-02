@@ -49,7 +49,21 @@ public struct GraphCommand {
         let directedGraphWriter = directedGraphWriterFactory.writer(for: syntax)
         switch projectRoot {
         case .xcodeproj(let xcodeprojFileURL):
-            let xcodeProject = try xcodeProjectParser.parseProject(at: xcodeprojFileURL, packagesURL: { $0.appendingPathComponent("Packages") })
+            let xcodeProject = try xcodeProjectParser.parseProject(at: xcodeprojFileURL, packagesURL: { $0.appendingPathComponent("Packages") }, includeNativeTarget: {
+                guard $0.productType != .unitTestBundle &&
+                        $0.productType != .uiTestBundle else {
+                    return false
+                }
+                if $0.name == "GrubHub" || $0.name == "Seamless" {
+                    return true
+                } else if $0.productType == .application {
+                    return false
+                } else {
+                    return true
+                }
+            }, includePackageProduct: {
+                $0.productName != "ApplicationCore"
+            })
             let graph = try xcodeProjectGraphBuilder.buildGraph(from: xcodeProject)
             let reachableGraph = graph.reachableGraph(from: DirectedGraph.Node.target(labeled: "CheckoutSubApp"))
             try directedGraphWriter.write(reachableGraph)
